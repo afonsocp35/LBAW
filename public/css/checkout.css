@@ -1,0 +1,158 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Lora:wght@400;700&display=swap');
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Inter', sans-serif;
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    overflow-x: hidden;
+}
+
+.checkout-wrapper {
+    margin-top: 65px; /* ... */
+    display: flex;
+    gap: 25px;
+    flex-direction: column;
+    width: 100%;
+    max-width: 1200px;
+    padding: 25px 25px;
+    background: #ffffff;
+    box-sizing: border-box;
+    border-radius: 5px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.billing-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.billing-details h2 {
+    font-size: 32px;
+    font-weight: 600;
+    color: #121212;
+    margin-bottom: 17px;
+}
+
+.billing-details h3 {
+    font-size: 21px;
+    font-weight: 570;
+    margin-bottom: 25px;
+    color: #121212;
+}
+
+.billing-details label {
+    font-size: 16px;
+    font-weight: 400;
+    /* margin-bottom: 15px; */
+    color: #555555;
+}
+
+.billing-details input,
+.billing-details select {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 25px;
+    margin-top: 5px;
+    width: calc(100% - 20px);
+}
+
+#payment-method {
+    height: 40px;
+    -webkit-appearance: menulist-button;
+    appearance: menulist-button;
+    width: 100%;
+}
+
+.billing-details input:focus,
+.billing-details select:focus {
+    border-color: #ff5733;
+    outline: none;
+}
+
+.billing-details button {
+    background-color: #121212;
+    color: #fff;
+    padding: 15px 25px;
+    font-size: 16px;
+    font-weight: 500;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease-in-out;
+}
+
+.billing-details button:hover {
+    box-shadow: 1px 1px 13px 3px rgba(0, 0, 0, 0.1);
+    background-color: #2b2626;
+}
+
+.order-summary {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+}
+
+.order-summary h2 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #121212;
+    margin-bottom: 17px;
+}
+
+.order-summary table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.order-summary th,
+.order-summary td {
+    padding: 12px;
+    text-align: left;
+    font-size: 16px;
+    color: #555555;
+}
+
+.order-summary th {
+    background-color: #f5f5f5;
+}
+
+.order-summary tr.total {
+    font-weight: 600;
+    background-color: #f5f5f5;
+}
+
+.order-summary td.total {
+    color: #ff5733;
+}
+
+.order-summary td {
+    border-bottom: 1px solid #ddd;
+}
+
+.order-summary td:last-child {
+    font-weight: 600;
+}
+
+.back-button {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    text-decoration: none;
+    color: black;
+}
+
+.back-button:hover {
+    color: gray;
+}

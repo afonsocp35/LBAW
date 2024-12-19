@@ -1,0 +1,465 @@
+openapi: 3.1.0
+
+info:
+  version: '1.0'
+  title: 'LBAW Clubhouse Web API'
+  description: 'Web Resources Specification (A7) for Clubhouse'
+
+servers:
+  - url: http://lbaw.fe.up.pt
+    description: Production server
+
+externalDocs:
+  description: Find more info here.
+  url: https://gitlab.up.pt/lbaw/lbaw2425/lbaw24074/-/wikis/eap
+
+tags:
+  - name: 'M01: Authentication and Profiles'
+  - name: 'M02: Product Listings'
+  - name: 'M03: Purchases'
+  - name: 'M04: User Administration and Static pages'
+
+paths:
+  /login:
+    get:
+      operationId: FR.011
+      summary: 'FR.031 & FR.107: Login Form'
+      description: 'Provide login form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      responses:
+        '200':
+          description: 'Ok. Show log-in UI'
+    post:
+      operationId: FR.011
+      summary: 'FR.031 & FR.107: Login Action'
+      description: 'Processes the login form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                remember:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Login successful"
+                  redirect:
+                    type: string
+                    example: "/catalog"
+        '401':
+          description: Unauthorized - Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "The provided credentials do not match our records."
+  /logout:
+    post:
+      operationId: FR.103
+      summary: 'FR.031 & FR.107: Logout Action'
+      description: 'Logout the current authenticated user. Access: USR, ADM'
+      tags:
+        - 'M01: Authentication and Profiles'
+       responses:
+        '200':
+          description: User logged out successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You have logged out successfully!"
+                  redirect:
+                    type: string
+                    example: "/login"
+
+  /register:
+    get:
+      operationId: FR.012
+      summary: 'FR.031 & FR.107: Register Form'
+      description: 'Provide new user registration form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      responses:
+        '200':
+          description: 'Ok. Show sign-up UI'
+
+    post:
+      operationId: FR.012
+      summary: 'FR.031 & FR.107: Register Action'
+      description: 'Processes the new user registration form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "John Doe"
+                username:
+                  type: string
+                  example: "johndoe123"
+                email:
+                  type: string
+                  format: email
+                  example: "johndoe@example.com"
+                address:
+                  type: string
+                  example: "1234 Elm Street"
+                password:
+                  type: string
+                  format: password
+                  example: "password123"
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: "password123"
+      responses:
+        '200':
+          description: User successfully registered and logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "You have successfully registered & logged in!"
+                  redirect:
+                    type: string
+                    example: "/catalog"
+        '400':
+          description: Bad request - Validation errors
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Validation error"
+                  errors:
+                    type: object
+                    additionalProperties:
+                      type: array
+                      items:
+                        type: string
+  /catalog:
+    get:
+      operationId: FR.101
+      summary: 'FR.101: View Products List'
+      description: 'Get a list of products in the catalog.'
+      tags:
+        - 'M02: Product Listings'
+      responses:
+        '200':
+          description: 'List of products in the catalog'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  /product/{id}:
+    get:
+      operationId: FR.103
+      summary: 'FR.103: View Product Details'
+      description: 'Get the details of a specific product.'
+      tags:
+        - 'M02: Product Listings'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Product details'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+
+  /catalog/search:
+    get:
+      operationId: FR.031A
+      summary: 'FR.031A: Exact match Search'
+      description: 'Search for products with an exact match query.'
+      tags:
+        - 'M02: Product Listings'
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: platform
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: genre
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Search results for exact match queries'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  /shopping-cart/{userId}/add/{productId}:
+    post:
+      operationId: FR.105
+      summary: 'FR.105: Add Product to Shopping Cart'
+      description: 'Add a product to the shopping cart.'
+      tags:
+        - 'M03: Purchases'
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: integer
+                  description: Quantity of the product to add.
+                  example: 1
+      responses:
+        '200':
+          description: 'Product added to cart'
+        '404':
+          description: 'Product not found'
+        '400':
+          description: 'Invalid request'
+
+  /shopping-cart/{id}:
+    get:
+      operationId: FR.106
+      summary: 'FR.106: Manage Shopping Cart'
+      description: 'Manage items in the shopping cart.'
+      tags:
+        - 'M03: Purchases'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 'Current shopping cart'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cartItems:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CartItem'
+                  totalCost:
+                    type: number
+                    format: float
+                    example: 100.50
+    patch:
+      operationId: FR.106
+      summary: 'FR.106: Update Shopping Cart'
+      description: 'Update the shopping cart with changes in item quantity.'
+      tags:
+        - 'M03: Purchases'
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShoppingCartUpdate'
+      responses:
+        '200':
+          description: 'Shopping cart updated successfully'
+    /shopping-cart/{id}/remove:
+  post:
+    operationId: FR.107
+    summary: 'FR.107: Remove Product from Shopping Cart'
+    description: 'Remove a product from the shopping cart.'
+    tags:
+      - 'M03: Purchases'
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        description: 'User ID'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              product_id:
+                type: string
+                description: 'ID of the product to remove'
+            required:
+              - product_id
+    responses:
+      '200':
+        description: 'Item removed successfully'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: 'Item removed successfully!'
+      '403':
+        description: 'Unauthorized access'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: 'Unauthorized'
+      '404':
+        description: 'Item not found in the cart'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: 'Item not found in the cart'
+      '400':
+        description: 'Invalid request'
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                error:
+                  type: string
+                  example: 'Invalid request'
+
+
+  /admin/users:
+    get:
+      operationId: FR.042
+      summary: 'FR.042: Administer User Accounts'
+      description: 'Get a list of users (Admin)'
+      tags:
+        - 'M04: User Administration and Static pages'
+      responses:
+        '200':
+          description: 'List of users'
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+components:
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+    CartItem:
+      type: object
+      properties:
+        productId:
+          type: string
+        quantity:
+          type: integer
+    ShoppingCartUpdate:
+      type: object
+      properties:
+        cartItems:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              quantity:
+                type: integer
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        address:
+          type: string

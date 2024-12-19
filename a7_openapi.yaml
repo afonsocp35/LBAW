@@ -1,0 +1,501 @@
+openapi: 3.0.0
+
+info:
+  version: '1.0'
+  title: 'Clubhouse Web API'
+  description: 'Web Resources Specification (A7) for Clubhouse'
+
+servers:
+  - url: http://localhost:8080
+    description: Local server
+
+tags:
+  - name: 'M01: Authentication and Profiles'
+  - name: 'M02: Product Listings'
+  - name: 'M03: Purchases'
+  - name: 'M04: Reviews and notifications'
+  - name: 'M05: Administration and static pages'
+
+paths:
+
+  # M01 endpoints
+  # /login
+
+  /login:
+    get:
+      operationId: R101
+      summary: 'R101: Login Form'
+      description: 'Provide login form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      responses:
+        '200':
+          description: 'Ok. Show login UI.'
+        '302':
+          description: 'User is already logged in.'
+          headers:
+            Location:
+              description: 'URL to redirect if access fails.'
+              schema:
+                type: string
+                example: '/catalog'
+
+    post:
+      operationId: R102
+      summary: 'R102: Login Action'
+      description: 'Processes the login form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                remember-me:
+                    type: boolean
+              required:
+                - email
+                - password
+      responses:
+        '302':
+          description: 'Redirect after processing login credentials.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Authentication succeeded. Redirect to catalog page.'
+                  value: '/catalog'
+                302Error:
+                  description: 'Authentication failed. Redirect to login form.'
+                  value: '/login'
+
+  # /logout
+
+  /logout:
+    get:
+      operationId: R103
+      summary: 'R103: Logout Action'
+      description: 'Logout currently authenticated used. Access: USR, ADM'
+      tags:
+        - 'M01: Authentication and Profiles'
+      responses:
+        '302':
+          description: 'Redirect after successful logout.'
+          headers:
+            Location:
+              description: 'URL to redirect the user after logout.'
+              schema:
+                type: string
+                example: '/login'
+
+  # /register
+
+  /register:
+    get:
+      operationId: R104
+      summary: 'R104: Register Form'
+      description: 'Provide a user registration form. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      responses:
+        '200':
+          description: 'Ok. Show sign-up UI.'
+
+    post:
+      operationId: R105
+      summary: 'R105: Register Action'
+      description: 'Processes a user registration form submission. Access: PUB'
+      tags:
+        - 'M01: Authentication and Profiles'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                # ???
+                address:
+                  type: string
+                password:
+                  type: string
+                password-confirm:
+                  type: string
+              required:
+                - name
+                - username
+                - email
+                - address
+                - password
+                - password-confirm
+      responses:
+        '302':
+          description: 'Redirect after processing a user registration.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Authentication succeeded. Redirect to catalog page.'
+                  value: '/catalog'
+                302Error:
+                  description: 'Authentication failed. Redirect to login form.'
+                  value: '/login'
+
+  /profile/{id}:
+    get:
+      operationId: R106
+      summary: 'R106: Profile page'
+      description: 'Display a user profile. Access: OWN, ADM'
+      tags:
+        - 'M01: Authentication and Profiles'
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: 'Ok. Show profile UI'
+        '403':
+          description: 'Forbidden. User does not have permission to access this profile.'
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: '403 | UNAUTHORIZED'
+    post:
+      operationId: R107
+      summary: 'R107: Edit Profile Action'
+      description: 'Processes a profile update form submission. Access: OWN, ADM'
+      tags:
+        - 'M01: Authentication and Profiles'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                username:
+                  type: string
+                email:
+                  type: string
+                # ???
+                address:
+                  type: string
+                profile-picture:
+                  type: string
+                  format: binary
+              required:
+                - name
+                - username
+                - email
+      responses:
+        '302':
+          description: 'Redirect after processing a user profile update.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Updated succeeded. Redirect to profile page.'
+                  value: '/profile/{ids}'
+        '403':
+          description: 'Forbidden. User does not have permission to edit this profile.'
+
+  /profile/{id}/edit:
+    get:
+      operationId: R108
+      summary: 'R108: Edit Profile Page'
+      description: 'Edit a user profile. Access: OWN, ADM'
+      tags:
+        - 'M01: Authentication and Profiles'
+      parameters:
+        - in: path
+          name: id
+          description: 'User id'
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: 'Ok. Show edit profile UI'
+        '403':
+          description: 'Forbidden. User does not have permission to edit this profile.'
+
+  # M02 endpoints
+
+  /catalog:
+    get:
+      operationId: R201
+      summary: 'R201: Product Catalog'
+      description: 'Provide product catalog. Access: PUB'
+      tags:
+        - 'M02: Product Listings'
+      responses:
+        '200':
+          description: 'Ok. Show product catalog UI.'
+
+  /catalog/search:
+    get:
+      operationId: R202
+      summary: 'R202: Product Catalog Search'
+      description: 'Processes a product search form. Access: PUB'
+      tags:
+        - 'M02: Product Listings'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                search:
+                  type: string
+              required:
+                - search
+      responses:
+        '200':
+          description: 'Ok. Show product catalog UI with search filter applied.'
+
+  /product/{id}:
+    get:
+      operationId: R203
+      summary: 'R203: Product Page'
+      description: 'Provide product page. Access: PUB'
+      tags:
+        - 'M02: Product Listings'
+      parameters:
+        - in: path
+          name: id
+          description: 'Product id'
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: 'Ok. Show product UI.'
+        '404':
+          description: 'Not Found. No product with that id.'
+
+  # M03 endpoints
+
+  /shopping-cart:
+    get:
+      operationId: R301
+      summary: 'R301: Shopping Cart Page'
+      description: 'Provide the shopping cart page. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      responses:
+        '200':
+          description: 'Ok. Show shopping cart page UI.'
+        '302':
+          description: 'Redirect if user is not authenticated.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Error:
+                  description: 'URL to redirect if user is not authenticated.'
+                  value: '/login'
+    patch:
+      operationId: R302
+      summary: 'R302: Shopping Cart Item Quantity Update'
+      description: 'Processes a shopping cart item quantity update. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                product-id:
+                  type: string
+                quantity:
+                  type: string
+              required:
+                - product-id
+                - quantity
+      responses:
+        '302':
+          description: 'Redirect after processing a shopping cart item quantity update.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Uodate succeeded. Redirect to shopping cart page.'
+                  value: '/shopping-cart'
+                302Error:
+                  description: 'Update failed, item not in cart. Also redirect to shopping cart page.'
+                  value: '/shopping-cart'
+
+  /shopping-cart/remove:
+    post:
+      operationId: R303
+      summary: 'R303: Shopping Cart Item Removal'
+      description: 'Processes a shopping cart item removal. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                product-id:
+                  type: string
+              required:
+                - product-id
+      responses:
+        '302':
+          description: 'Redirect after processing a shopping cart item removal.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Removal succeeded. Redirect to shopping cart page.'
+                  value: '/shopping-cart'
+                302Error:
+                  description: 'Removal failed, item not in cart. Also redirect to shopping cart page.'
+                  value: '/shopping-cart'
+
+  /shopping-cart/add/{product_id}:
+    post:
+      operationId: R304
+      summary: 'R304: Shopping Cart Item Addition'
+      description: 'Processes a shopping cart item addition. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      parameters:
+        - in: path
+          name: product_id
+          description: 'Product id'
+          schema:
+            type: integer
+          required: true
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: string
+              required:
+                - quantity
+      responses:
+        '302':
+          description: 'Redirect after processing a shopping cart item addition.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Success:
+                  description: 'Addition succeeded. Redirect to shopping cart page.'
+                  value: '/shopping-cart'
+                302InvalidItemError:
+                  description: 'Addition failed, item does not exist. Also redirect to shopping cart page.'
+                  value: '/shopping-cart'
+                302InvalidQuantityError:
+                  description: 'Addition failed, invalid quantity. Also redirect to shopping cart page.'
+                  value: '/shopping-cart'
+
+  /purchase-history:
+    get:
+      operationId: R305
+      summary: 'R305: Purchase History Page'
+      description: 'Provide the purchase history page. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      responses:
+        '200':
+          description: 'Ok. Show purchase history UI.'
+        '302':
+          description: 'Redirect if user is not authenticated.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Error:
+                  description: 'URL to redirect if user is not authenticated.'
+                  value: '/login'
+
+  /checkout:
+    get:
+      operationId: R306
+      summary: 'R306: Checkout Page'
+      description: 'Provide the checkout page. Access: USR'
+      tags:
+        - 'M03: Purchases'
+      responses:
+        '200':
+          description: 'Ok. Show checkout page UI.'
+        '302':
+          description: 'Redirect if user is not authenticated.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Error:
+                  description: 'URL to redirect if user is not authenticated.'
+                  value: '/login'
+
+  # M04 endpoints
+
+  # M05 endpoints
+
+  /admin/users:
+    get:
+      operationId: R501
+      summary: 'R501: User List'
+      description: 'Provide a list of users registered in the system. Access: ADM'
+      tags:
+        - 'M05: Administration and static pages'
+      responses:
+        '200':
+          description: 'Ok. Show user list UI.'
+        '403':
+          description: 'Forbidden. User is not an administrator.'
+        '302':
+          description: 'Redirect if user is not authenticated.'
+          headers:
+            Location:
+              schema:
+                type: string
+              examples:
+                302Error:
+                  description: 'URL to redirect if user is not authenticated.'
+                  value: '/login'
