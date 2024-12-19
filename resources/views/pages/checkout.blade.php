@@ -41,43 +41,65 @@
 
         <section class="billing-details">
             <h2>Billing Information</h2>
+
+            <!-- Mostrar mensagens globais de erro -->
+            @if ($errors->any())
+                <div class="error-summary">
+                    <h3>There were some problems with your submission:</h3>
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <form action="/checkout" method="POST"> <!-- todo -->
                 @csrf
 
                 <h3>Personal information</h3>
                 <label for="name">Name</label>
-                <input type="text" id="name" name="name" value="{{ $user->name }}" required>
+                <input type="text" id="name" name="name" value="{{ old('name', $user->name) }}" required>
+                @error('name')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
 
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" value="{{ $user->email }}" required>
+                <input type="email" id="email" name="email" value="{{ old('email', $user->email) }}" required>
+                @error('email')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
 
                 <h3>Payment Details</h3>
                 <div class="payment-methods">
                     <label for="payment-method">Select Payment Method</label>
                     <select id="payment-method" name="payment-method" required>
-                        <option value="credit-card">Credit Card</option>
-                        <!-- <option value="paypal">PayPal</option>
-                        <option value="mbway">MBWay</option> -->
+                        <option value="Card" {{ old('payment-method') === 'card' ? 'selected' : '' }}>Credit Card</option>
+                        <option value="Paypal" {{ old('payment-method') === 'paypal' ? 'selected' : '' }}>PayPal</option>
+                        <option value="Mbway" {{ old('payment-method') === 'mbway' ? 'selected' : '' }}>MBWay</option>
                     </select>
+                    @error('payment-method')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
                 <label for="card-number">Card Number</label>
-                <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456" required>
+                <input type="text" id="card-number" name="card-number" placeholder="1234 5678 9012 3456" value="{{ old('card-number') }}" required>
+                @error('card-number')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
 
                 <label for="expiry-date">Expiry Date</label>
-                <input type="month" id="expiry-date" name="expiry-date" placeholder="MM/YY" required>
+                <input type="month" id="expiry-date" name="expiry-date" placeholder="MM/YY" value="{{ old('expiry-date') }}" required>
+                @error('expiry-date')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
 
                 <label for="cvv">CVV</label>
-                <input type="text" id="cvv" name="cvv" placeholder="123" required>
-
-                <!-- todo -->
-                <!--
-                <label for="paypal-email">Expiry Date</label>
-                <input type="email" id="paypal-email" name="paypal-email" value="{{ $user->email }}" required>
-
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" name="phone">
-                 -->
+                <input type="text" id="cvv" name="cvv" placeholder="123" value="{{ old('cvv') }}" required>
+                @error('cvv')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
 
                 <button type="submit">Place Order</button>
             </form>

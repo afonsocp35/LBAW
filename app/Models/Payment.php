@@ -9,6 +9,7 @@ class Payment extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;    
     // Specify the table name if it does not follow the default Laravel naming convention
     protected $table = 'Payment';
 
